@@ -11,6 +11,8 @@
 
   <ItemGroup>
     <Folder Include="Models\" />
-    <Folder Include="Base\" />
+    <Folder Include="Helpers\" />
+    <Folder Include="Database\" />
+    <Folder Include="DataStructures\" />
   </ItemGroup>
 </Project>

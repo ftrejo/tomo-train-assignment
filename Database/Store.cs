@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using Microsoft.Azure.Cosmos.Table;
+
 using TrainSchedule.Models;
 
-
-namespace TrainSchedule
+namespace TrainSchedule.Database
 {
     public class Store
     {
@@ -20,8 +21,8 @@ namespace TrainSchedule
 
         public async Task<TableResult> Set(string key, object value)
         {
-            //TableEntity entity = new TableEntity();
             TrainlineEntity trainlineEntity = new TrainlineEntity(key, (string)value);
+
             return await InsertOrMergeEntityAsync(table, trainlineEntity);
         }
 
@@ -29,7 +30,6 @@ namespace TrainSchedule
         {
             TableOperation retrieveOperation = TableOperation.Retrieve<TrainlineEntity>("0000", key);
 
-            // Execute the retrieve operation.
             return await table.ExecuteAsync(retrieveOperation);
         }
 
@@ -47,7 +47,6 @@ namespace TrainSchedule
             }
             while (continuationToken != null);
 
-            // Execute the retrieve operation.
             return trainlines;
         }
 
@@ -72,7 +71,5 @@ namespace TrainSchedule
                 throw;
             }
         }
-
-        //private static async Task<TableResult> 
     }
 }
