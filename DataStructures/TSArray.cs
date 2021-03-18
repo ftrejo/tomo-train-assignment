@@ -52,7 +52,7 @@ namespace TrainSchedule.DataStructures
             string[] times = tle.Schedule.TrimStart('[').TrimEnd(']').Split(',');
             foreach (string s in times)
             {
-                int index = Helper.ConvertToInt(s);
+                int index = Helper.ConvertTimeToInt(s);
 
                 lock (data[index])
                 {

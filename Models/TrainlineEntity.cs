@@ -6,9 +6,15 @@ using Microsoft.Azure.Cosmos.Table;
 
 namespace TrainSchedule.Models
 {
+    /// <summary>
+    /// Trainline inherits from TableEntity which is the object to query against
+    /// </summary>
     public class TrainlineEntity : TableEntity
     {
         private string _name;
+        /// <summary>
+        /// Trainline name
+        /// </summary>
         [Required]
         public String Name
         {
