@@ -15,5 +15,6 @@
     <Folder Include="Database\" />
     <Folder Include="DataStructures\" />
     <Folder Include="Config\" />
+    <Folder Include="Database\DatabaseObjects\" />
   </ItemGroup>
 </Project>

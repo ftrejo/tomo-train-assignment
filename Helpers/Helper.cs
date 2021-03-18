@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 using TrainSchedule.DataStructures;
-using TrainSchedule.Models;
+using TrainSchedule.Database;
 
 namespace TrainSchedule.Helpers
 {
@@ -47,27 +47,7 @@ namespace TrainSchedule.Helpers
             {
                 json += String.Format("'{0}', ", tle.RowKey);
             }
-            json += "]";
-
-            return json;
-        }
-
-        /// <summary>
-        /// Convert a string schedule to JSON
-        /// </summary>
-        /// <param name="schedule">String schedule</param>
-        /// <returns><JSON string schedule/returns>
-        public static string ScheduleToJson(string schedule)
-        {
-            string json = "[";
-
-            string[] times = schedule.TrimStart('[').TrimEnd(']').Split(',');
-            foreach (string s in times)
-            {
-                String.Format("'{0}',", s);
-                json += String.Format("'{0}', ", s);
-            }
-
+            json = json.TrimEnd(' ').TrimEnd(',');
             json += "]";
 
             return json;
@@ -99,10 +79,10 @@ namespace TrainSchedule.Helpers
         /// <summary>
         /// Checks when the next time multiple trains arrive at the station
         /// </summary>
-        /// <param name="tsa">Thread safe array that has all the int representations</param>
+        /// <param name="tsArr">Thread safe array that has all the int representations</param>
         /// <param name="targetIndex">Index to check forward</param>
         /// <returns></returns>
-        public static String GetNextTimeMutlipleTrains(TSArray tsa, int targetIndex)
+        public static String GetNextTimeMutlipleTrains(TSArray tsArr, int targetIndex)
         {
             bool isDone = false;
             int index = targetIndex;
@@ -117,7 +97,7 @@ namespace TrainSchedule.Helpers
                 if (index == 1440)
                     index = 0;
 
-                if (tsa[index] > 1)
+                if (tsArr[index] > 1)
                 {
                     return ConvertIndexToTime(index);
                 }

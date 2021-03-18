@@ -44,7 +44,6 @@ namespace TrainSchedule.Database
             try
             {
                 TableOperation insertOrMergeOperation = TableOperation.InsertOrMerge(entity);
-
                 await _table.ExecuteAsync(insertOrMergeOperation);
             }
             catch (StorageException e)

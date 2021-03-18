@@ -41,7 +41,7 @@ namespace TrainSchedule.Controllers
         /// <param name="trainline">Trainline from post request</param>
         [HttpPost]
         [Route("AddTrainline")]
-        public void AddTrainline(TrainlineEntity trainline)
+        public void AddTrainline(Trainline trainline)
         {
             TableDB store = new TableDB(_connectionString, _tableName);
             if (!Helper.IsValidName(trainline.Name))
@@ -51,15 +51,17 @@ namespace TrainSchedule.Controllers
                     System.Net.HttpStatusCode.BadRequest);
             }
 
+            TrainlineEntity tle = new TrainlineEntity();
+
             List<string> times = new List<string>();
-            foreach (string s in trainline.ScheduleArr)
+            foreach (string s in trainline.Schedule)
                 times.Add(Helper.FormatTime(s));
 
-            string formattedStr = String.Join(",", times.Select(p => p.ToString()).ToArray());
-            trainline.Schedule = formattedStr;
+            tle.Schedule = String.Join(",", times.Select(p => p.ToString()).ToArray());
+
             try
             {
-                store.Set<TrainlineEntity>(trainline.Name, trainline);
+                store.Set<TrainlineEntity>(trainline.Name, tle);
                 formatResponse(204);
             }
             catch(Exception ex)
@@ -76,7 +78,7 @@ namespace TrainSchedule.Controllers
         /// <returns>Trainline object</returns>
         [HttpGet]
         [Route("GetTrainline")]
-        public TrainlineEntity GetTrainline(string key)
+        public Trainline GetTrainline(string key)
         {
             TableDB store = new TableDB(_connectionString, _tableName);
             Task<TableResult> taskTableResult = store.Fetch<TrainlineEntity>(key);
@@ -85,7 +87,7 @@ namespace TrainSchedule.Controllers
 
             int code = tableResult.HttpStatusCode;
             formatResponse(code);
-            return tle;
+            return new Trainline(tle);
         }
 
         /// <summary>
@@ -118,11 +120,11 @@ namespace TrainSchedule.Controllers
             Task<List<TrainlineEntity>> taskTrainlines = store.Keys<TrainlineEntity>();
             List<TrainlineEntity> trainlines = taskTrainlines.Result;
 
-            TSArray tsa = new TSArray(trainlines);
+            TSArray tsArr = new TSArray(trainlines);
 
             int targetIndex = Helper.ConvertTimeToInt(Helper.FormatTime(time));
 
-            return Helper.GetNextTimeMutlipleTrains(tsa, targetIndex);
+            return Helper.GetNextTimeMutlipleTrains(tsArr, targetIndex);
         }
 
         private void formatResponse(int code)
