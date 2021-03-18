@@ -14,5 +14,6 @@
     <Folder Include="Helpers\" />
     <Folder Include="Database\" />
     <Folder Include="DataStructures\" />
+    <Folder Include="Config\" />
   </ItemGroup>
 </Project>

@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Net.Http;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos.Table;
+using Microsoft.Extensions.Options;
 
+using TrainSchedule.Config;
 using TrainSchedule.Database;
 using TrainSchedule.DataStructures;
 using TrainSchedule.Models;
 using TrainSchedule.Helpers;
-
 
 namespace TrainSchedule.Controllers
 {
@@ -18,35 +20,49 @@ namespace TrainSchedule.Controllers
     [Route("api/station")]
     public class StationController : ControllerBase
     {
-        public StationController()
+        private string _connectionString;
+        private const string _tableName = "schedules";
+        public StationController(IOptions<CosmosTableDB> settings)
         {
+            _connectionString = settings.Value.ConnectionString;
         }
 
         [HttpPost]
         [Route("AddTrainline")]
         public void AddTrainline(TrainlineEntity trainline)
         {
-            Store store = new Store();
+            TableDB store = new TableDB(_connectionString, _tableName);
             if (!Helper.IsValidName(trainline.Name))
-                throw new Exception();
+            {
+                //Response.
+                throw new HttpRequestException("Invalid Name", null,
+                    System.Net.HttpStatusCode.BadRequest);
+            }
 
             List<string> times = new List<string>();
             foreach (string s in trainline.ScheduleArr)
                 times.Add(Helper.FormatTime(s));
 
-            string output = String.Join(",", times.Select(p => p.ToString()).ToArray());
-            
-            int code = store.Set(trainline.Name, output).Result.HttpStatusCode;
-            FormatResponse(code);
-            return;
+            string formattedStr = String.Join(",", times.Select(p => p.ToString()).ToArray());
+            trainline.Schedule = formattedStr;
+            try
+            {
+                store.Set<TrainlineEntity>(trainline.Name, trainline);
+                FormatResponse(204);
+            }
+            catch(Exception ex)
+            {
+                throw new HttpRequestException("AddTrainline Table DB error", ex,
+                    System.Net.HttpStatusCode.BadRequest);
+            }
         }
 
         [HttpGet]
         [Route("GetTrainline")]
         public String GetTrainline(string key)
         {
-            Store store = new Store();
-            Task<TableResult> taskTableResult = store.Fetch(key);
+            TableDB store = new TableDB(_connectionString, _tableName);
+            Task<TableResult> taskTableResult = store.Fetch<TrainlineEntity>(key);
             TableResult tableResult = taskTableResult.Result;
             TrainlineEntity tle = (TrainlineEntity)tableResult.Result;
 
@@ -59,8 +75,8 @@ namespace TrainSchedule.Controllers
         [Route("GetAllTrainlineNames")]
         public String GetAllTrainlineNames()
         {
-            Store store = new Store();
-            Task<List<TrainlineEntity>> taskTrainlines = store.Keys();
+            TableDB store = new TableDB(_connectionString, _tableName);
+            Task<List<TrainlineEntity>> taskTrainlines = store.Keys<TrainlineEntity>();
             List<TrainlineEntity> trainlines = taskTrainlines.Result;
 
             FormatResponse(200);
@@ -71,14 +87,13 @@ namespace TrainSchedule.Controllers
         [Route("GetNextMultipleTrains")]
         public String GetNextMultipleTrains(string time)
         {
-            Store store = new Store();
-            Task<List<TrainlineEntity>> taskTrainlines = store.Keys();
+            TableDB store = new TableDB(_connectionString, _tableName);
+            Task<List<TrainlineEntity>> taskTrainlines = store.Keys<TrainlineEntity>();
             List<TrainlineEntity> trainlines = taskTrainlines.Result;
 
             TSArray tsa = new TSArray(trainlines);
 
             int targetIndex = Helper.ConvertToInt(Helper.FormatTime(time));
-            tsa[targetIndex] = 2;
 
             return Helper.GetNextTimeMutlipleTrains(tsa, targetIndex);
         }

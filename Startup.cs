@@ -12,6 +12,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
+using TrainSchedule.Config;
+
 namespace TrainSchedule
 {
     public class Startup
@@ -26,8 +28,8 @@ namespace TrainSchedule
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllers();
+            services.Configure<CosmosTableDB>(Configuration.GetSection("CosmosTableDB"));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TrainSchedule", Version = "v1" });

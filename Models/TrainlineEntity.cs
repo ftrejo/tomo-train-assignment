@@ -8,8 +8,20 @@ namespace TrainSchedule.Models
 {
     public class TrainlineEntity : TableEntity
     {
+        private string _name;
         [Required]
-        public String Name { get; set; }
+        public String Name
+        {
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                RowKey = value;
+                _name = value;
+            }
+        }
 
         [IgnoreDataMember]
         public string Schedule { get; set; }
@@ -18,6 +30,7 @@ namespace TrainSchedule.Models
 
         public TrainlineEntity()
         {
+            PartitionKey = "0000";
         }
 
         public TrainlineEntity(String name, String schedule)
