@@ -12,7 +12,7 @@ using TrainSchedule.Config;
 using TrainSchedule.Database;
 using TrainSchedule.DataStructures;
 using TrainSchedule.Models;
-using TrainSchedule.Helpers;
+using TrainSchedule.Utils;
 
 namespace TrainSchedule.Controllers
 {
@@ -44,7 +44,7 @@ namespace TrainSchedule.Controllers
         public void AddTrainline(Trainline trainline)
         {
             TableDB store = new TableDB(_connectionString, _tableName);
-            if (!Helper.IsValidName(trainline.Name))
+            if (!Utility.IsValidName(trainline.Name))
             {
                 //To do figure out how to return errors.
                 throw new HttpRequestException("Invalid Name", null,
@@ -55,7 +55,7 @@ namespace TrainSchedule.Controllers
 
             List<string> times = new List<string>();
             foreach (string s in trainline.Schedule)
-                times.Add(Helper.FormatTime(s));
+                times.Add(Utility.FormatTime(s));
 
             tle.Schedule = String.Join(",", times.Select(p => p.ToString()).ToArray());
 
@@ -103,7 +103,7 @@ namespace TrainSchedule.Controllers
             List<TrainlineEntity> trainlines = taskTrainlines.Result;
 
             formatResponse(200);
-            return Helper.FormatTrainNamesJson(trainlines);
+            return Utility.FormatTrainNamesJson(trainlines);
         }
 
         /// <summary>
@@ -122,9 +122,9 @@ namespace TrainSchedule.Controllers
 
             TSArray tsArr = new TSArray(trainlines);
 
-            int targetIndex = Helper.ConvertTimeToInt(Helper.FormatTime(time));
+            int targetIndex = Utility.ConvertTimeToInt(Utility.FormatTime(time));
 
-            return Helper.GetNextTimeMutlipleTrains(tsArr, targetIndex);
+            return tsArr.GetNextTimeMutlipleTrains(targetIndex);
         }
 
         private void formatResponse(int code)

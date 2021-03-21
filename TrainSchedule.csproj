@@ -2,19 +2,24 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.0" />
     <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.8" />
+    <PackageReference Include="NUnit" Version="3.13.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.1" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Models\" />
-    <Folder Include="Helpers\" />
+    <Folder Include="Utils\" />
     <Folder Include="Database\" />
     <Folder Include="DataStructures\" />
     <Folder Include="Config\" />
     <Folder Include="Database\DatabaseObjects\" />
+    <Folder Include="IntegrationTests\" />
   </ItemGroup>
 </Project>

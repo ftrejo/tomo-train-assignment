@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 
-using TrainSchedule.Helpers;
 using TrainSchedule.Database;
+using TrainSchedule.Utils;
 
 namespace TrainSchedule.DataStructures
 {
@@ -45,6 +46,42 @@ namespace TrainSchedule.DataStructures
         }
 
         /// <summary>
+        /// Checks when the next time multiple trains arrive at the station
+        /// </summary>
+        /// <param name="tsArr">Thread safe array that has all the int representations</param>
+        /// <param name="targetIndex">Index to check forward</param>
+        /// <returns></returns>
+        public string GetNextTimeMutlipleTrains(int targetIndex)
+        {
+            if (targetIndex < 0 || targetIndex >= 1440)
+                throw new IndexOutOfRangeException("targetIndex must be between 0 and 1439");
+
+            bool isDone = false;
+            int index = targetIndex;
+
+            while (!isDone)
+            {
+                index++;
+
+                if (index == targetIndex)
+                    isDone = true;
+
+                if (index == 1440)
+                {
+                    index = -1;
+                    continue;
+                }
+
+                if (this[index] > 1)
+                {
+                    return Utility.ConvertIndexToTime(index);
+                }
+            }
+
+            return "Multiple trains do not arrive at the same time";
+        }
+
+        /// <summary>
         /// populateArray takes the List of TrainlineEntities and updates the value
         /// of the array. This method uses threads to add to the array in parallel
         /// </summary>
@@ -73,7 +110,7 @@ namespace TrainSchedule.DataStructures
             string[] times = tle.Schedule.TrimStart('[').TrimEnd(']').Split(',');
             foreach (string s in times)
             {
-                int index = Helper.ConvertTimeToInt(s);
+                int index = Utility.ConvertTimeToInt(s);
 
                 lock (data[index])
                 {

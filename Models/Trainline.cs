@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 using TrainSchedule.Database;
@@ -23,8 +22,13 @@ namespace TrainSchedule.Models
         public Trainline(TrainlineEntity tle)
         {
             Name = tle.RowKey;
+            string[] sched = tle.Schedule.TrimStart('[').TrimEnd(']').Split(',');
+            for (int i = 0; i < sched.Length; i++)
+            {
+                sched[i] = DateTime.Parse(sched[i]).ToString("hh:mm tt");
+            }
 
-            Schedule = tle.Schedule.TrimStart('[').TrimEnd(']').Split(',');
+            Schedule = sched;
         }
     }
 }
