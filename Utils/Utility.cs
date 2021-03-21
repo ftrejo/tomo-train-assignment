@@ -78,6 +78,11 @@ namespace TrainSchedule.Utils
             return name.Length <= 4 && Regex.IsMatch(name, "^[a-zA-Z0-9]*$");
         }
 
+        /// <summary>
+        /// Sanitizes the input using the Ganss.XSS lib
+        /// </summary>
+        /// <param name="input">text input</param>
+        /// <returns>Sanitized string</returns>
         public static string SanitizeInput(string input)
         {
             var sanitizer = new HtmlSanitizer();
