@@ -82,7 +82,7 @@ namespace TrainSchedule.Controllers
             try
             {
                 TableDB store = new TableDB(_connectionString, _tableName);
-                Task<TableResult> taskTableResult = store.Fetch<TrainlineEntity>(key);
+                Task<TableResult> taskTableResult = store.Fetch<TrainlineEntity>(Utility.SanitizeInput(key));
                 TableResult tableResult = taskTableResult.Result;
                 TrainlineEntity tle = (TrainlineEntity)tableResult.Result;
 
@@ -145,7 +145,7 @@ namespace TrainSchedule.Controllers
 
                 TSArray tsArr = new TSArray(trainlines);
 
-                int targetIndex = Utility.ConvertTimeToInt(Utility.FormatTime(time));
+                int targetIndex = Utility.ConvertTimeToInt(Utility.FormatTime(Utility.SanitizeInput(time)));
                 string result = tsArr.GetNextTimeMutlipleTrains(targetIndex);
 
                 return formatResponse(tsArr.GetNextTimeMutlipleTrains(targetIndex), 200, "application/json");
