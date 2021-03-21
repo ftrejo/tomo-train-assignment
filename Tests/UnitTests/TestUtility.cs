@@ -4,8 +4,9 @@ using System;
 using System.Collections.Generic;
 
 using TrainSchedule.Database;
+using TrainSchedule.Utils;
 
-namespace TrainSchedule.Utils
+namespace TrainSchedule.Tests
 {
     [TestFixture]
     public class TestUtility

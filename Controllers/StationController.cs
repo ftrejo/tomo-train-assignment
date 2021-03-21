@@ -41,7 +41,7 @@ namespace TrainSchedule.Controllers
         /// <param name="trainline">Trainline from post request</param>
         [HttpPost]
         [Route("AddTrainline")]
-        public void AddTrainline(Trainline trainline)
+        public IActionResult AddTrainline(Trainline trainline)
         {
             TableDB store = new TableDB(_connectionString, _tableName);
             if (!Utility.IsValidName(trainline.Name))
@@ -69,6 +69,8 @@ namespace TrainSchedule.Controllers
                 throw new HttpRequestException("AddTrainline Table DB error", ex,
                     System.Net.HttpStatusCode.BadRequest);
             }
+
+            return Created(tle.RowKey, tle);
         }
 
         /// <summary>

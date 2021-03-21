@@ -3,8 +3,9 @@
 using System;
 
 using TrainSchedule.Database;
+using TrainSchedule.Models;
 
-namespace TrainSchedule.Models
+namespace TrainSchedule.Tests
 {
     [TestFixture]
     public class TestTrainline

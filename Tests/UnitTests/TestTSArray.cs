@@ -4,9 +4,10 @@ using System;
 using System.Collections.Generic;
 
 using TrainSchedule.Database;
+using TrainSchedule.DataStructures;
 using TrainSchedule.Utils;
 
-namespace TrainSchedule.DataStructures
+namespace TrainSchedule.Tests
 {
     [TestFixture]
     public class TestTSArray

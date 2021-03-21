@@ -87,5 +87,21 @@ namespace TrainSchedule.Database
 
             return tableEntities;
         }
+
+        /// <summary>
+        /// Fatch a row from the DB
+        /// </summary>
+        /// <typeparam name="T">Class that extends TableEntity</typeparam>
+        /// <param name="key">Key to query against the tablee</param>
+        /// <returns>TableEntity object from the DB</returns>
+        public async void DeleteAll<T>() where T : TableEntity, new()
+        {
+            List<T> results = Keys<T>().Result;
+
+            foreach(T item in results)
+            {
+                await _table.ExecuteAsync(TableOperation.Delete(item));
+            }
+        }
     }
 }
