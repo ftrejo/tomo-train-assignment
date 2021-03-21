@@ -53,9 +53,9 @@ namespace TrainSchedule.Tests
             Assert.True(Utility.IsValidName("ABCD"));
             Assert.True(Utility.IsValidName("0001"));
 
-            Assert.Throws<ArgumentException>(() => Utility.IsValidName("  "));
-            Assert.Throws<ArgumentException>(() => Utility.IsValidName("!"));
-            Assert.Throws<ArgumentException>(() => Utility.IsValidName("12345"));
+            Assert.False(Utility.IsValidName("  "));
+            Assert.False(Utility.IsValidName("!"));
+            Assert.False(Utility.IsValidName("12345"));
         }
     }
 }

@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Net.Http;
+using System.Net;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos.Table;
-using Microsoft.Extensions.Options;
 
 using TrainSchedule.Config;
 using TrainSchedule.Database;
@@ -43,34 +42,32 @@ namespace TrainSchedule.Controllers
         [Route("AddTrainline")]
         public IActionResult AddTrainline(Trainline trainline)
         {
-            TableDB store = new TableDB(_connectionString, _tableName);
-            if (!Utility.IsValidName(trainline.Name))
-            {
-                //To do figure out how to return errors.
-                throw new HttpRequestException("Invalid Name", null,
-                    System.Net.HttpStatusCode.BadRequest);
-            }
-
-            TrainlineEntity tle = new TrainlineEntity();
-
-            List<string> times = new List<string>();
-            foreach (string s in trainline.Schedule)
-                times.Add(Utility.FormatTime(s));
-
-            tle.Schedule = String.Join(",", times.Select(p => p.ToString()).ToArray());
-
             try
             {
-                store.Set<TrainlineEntity>(trainline.Name, tle);
-                formatResponse(204);
-            }
-            catch(Exception ex)
-            {
-                throw new HttpRequestException("AddTrainline Table DB error", ex,
-                    System.Net.HttpStatusCode.BadRequest);
-            }
+                TableDB store = new TableDB(_connectionString, _tableName);
+                if (!Utility.IsValidName(trainline.Name))
+                {
+                    throw new Exception(string.Format("{0} is not a valid name.", trainline.Name));
+                }
 
-            return Created(tle.RowKey, tle);
+                TrainlineEntity tle = new TrainlineEntity();
+
+                List<string> times = new List<string>();
+                foreach (string s in trainline.Schedule)
+                    times.Add(Utility.FormatTime(s));
+
+                tle.Schedule = String.Join(",", times.Select(p => p.ToString()).ToArray());
+
+                store.Set<TrainlineEntity>(trainline.Name, tle);
+                return formatResponse(new Trainline(tle), 201, "application/json");
+
+            }
+            catch (Exception ex)
+            {
+                return formatResponse(
+                    string.Format("AddTrainline error: {0}", ex.Message),
+                    (int)HttpStatusCode.BadRequest);
+            }
         }
 
         /// <summary>
@@ -80,16 +77,26 @@ namespace TrainSchedule.Controllers
         /// <returns>Trainline object</returns>
         [HttpGet]
         [Route("GetTrainline")]
-        public Trainline GetTrainline(string key)
+        public IActionResult GetTrainline(string key)
         {
-            TableDB store = new TableDB(_connectionString, _tableName);
-            Task<TableResult> taskTableResult = store.Fetch<TrainlineEntity>(key);
-            TableResult tableResult = taskTableResult.Result;
-            TrainlineEntity tle = (TrainlineEntity)tableResult.Result;
+            try
+            {
+                TableDB store = new TableDB(_connectionString, _tableName);
+                Task<TableResult> taskTableResult = store.Fetch<TrainlineEntity>(key);
+                TableResult tableResult = taskTableResult.Result;
+                TrainlineEntity tle = (TrainlineEntity)tableResult.Result;
 
-            int code = tableResult.HttpStatusCode;
-            formatResponse(code);
-            return new Trainline(tle);
+                if (tle == null)
+                    throw new Exception(string.Format("key \"{0}\" not found", key));
+
+                return formatResponse(new Trainline(tle), tableResult.HttpStatusCode, "application/json");
+            }
+            catch(Exception ex)
+            {
+                return formatResponse(
+                    string.Format("GetTrainline error: {0}", ex.Message),
+                    (int)HttpStatusCode.BadRequest);
+            }
         }
 
         /// <summary>
@@ -98,14 +105,26 @@ namespace TrainSchedule.Controllers
         /// <returns>String of trainline names</returns>
         [HttpGet]
         [Route("GetAllTrainlineNames")]
-        public String GetAllTrainlineNames()
+        public IActionResult GetAllTrainlineNames()
         {
-            TableDB store = new TableDB(_connectionString, _tableName);
-            Task<List<TrainlineEntity>> taskTrainlines = store.Keys<TrainlineEntity>();
-            List<TrainlineEntity> trainlines = taskTrainlines.Result;
+            try
+            {
+                TableDB store = new TableDB(_connectionString, _tableName);
+                Task<List<TrainlineEntity>> taskTrainlines = store.Keys<TrainlineEntity>();
+                List<TrainlineEntity> trainlines = taskTrainlines.Result;
 
-            formatResponse(200);
-            return Utility.FormatTrainNamesJson(trainlines);
+                if(trainlines.Count == 0)
+                    return formatResponse("No trainlines", 200, "application/json");
+                else
+                    return formatResponse(Utility.FormatTrainNamesJson(trainlines), 200, "application/json");
+            }
+            catch(Exception ex)
+            {
+                return formatResponse(
+                    string.Format("GetAllTrainlineName error: {0}", ex.Message),
+                    (int)HttpStatusCode.BadRequest);
+            }
+            
         }
 
         /// <summary>
@@ -116,24 +135,36 @@ namespace TrainSchedule.Controllers
         /// <returns>String with the next time multiple trains arrive</returns>
         [HttpGet]
         [Route("GetNextMultipleTrains")]
-        public String GetNextMultipleTrains(string time)
+        public IActionResult GetNextMultipleTrains(string time)
         {
-            TableDB store = new TableDB(_connectionString, _tableName);
-            Task<List<TrainlineEntity>> taskTrainlines = store.Keys<TrainlineEntity>();
-            List<TrainlineEntity> trainlines = taskTrainlines.Result;
+            try
+            {
+                TableDB store = new TableDB(_connectionString, _tableName);
+                Task<List<TrainlineEntity>> taskTrainlines = store.Keys<TrainlineEntity>();
+                List<TrainlineEntity> trainlines = taskTrainlines.Result;
 
-            TSArray tsArr = new TSArray(trainlines);
+                TSArray tsArr = new TSArray(trainlines);
 
-            int targetIndex = Utility.ConvertTimeToInt(Utility.FormatTime(time));
+                int targetIndex = Utility.ConvertTimeToInt(Utility.FormatTime(time));
+                string result = tsArr.GetNextTimeMutlipleTrains(targetIndex);
 
-            return tsArr.GetNextTimeMutlipleTrains(targetIndex);
+                return formatResponse(tsArr.GetNextTimeMutlipleTrains(targetIndex), 200, "application/json");
+            }
+            catch (Exception ex)
+            {
+                return formatResponse(
+                    string.Format("GetNextMultipleTrains error: {0}", ex.Message),
+                    (int)HttpStatusCode.BadRequest);
+            }
         }
 
-        private void formatResponse(int code)
+        private JsonResult formatResponse(object value, int code, string contentType = "text/html")
         {
-            Response.ContentType = "application/json";
-            Response.StatusCode = code;
-            
+            JsonResult result = new JsonResult(value);
+            result.StatusCode = code;
+            result.ContentType = contentType;
+
+            return result;
         }
     }
 }

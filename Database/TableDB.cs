@@ -31,7 +31,7 @@ namespace TrainSchedule.Database
         /// <typeparam name="T">Class that extends TableEntity</typeparam>
         /// <param name="key">Key to add to the table</param>
         /// <param name="value">A TableEntity object</param>
-        public async void Set<T>(string key, object value) where T : TableEntity
+        public void Set<T>(string key, object value) where T : TableEntity
         {
             ITableEntity entity = (T)value;
             entity.RowKey = key;
@@ -44,7 +44,7 @@ namespace TrainSchedule.Database
             try
             {
                 TableOperation insertOrMergeOperation = TableOperation.InsertOrMerge(entity);
-                await _table.ExecuteAsync(insertOrMergeOperation);
+                _table.ExecuteAsync(insertOrMergeOperation);
             }
             catch (StorageException e)
             {

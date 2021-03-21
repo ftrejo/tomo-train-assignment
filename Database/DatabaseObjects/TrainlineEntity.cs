@@ -5,7 +5,8 @@ using Microsoft.Azure.Cosmos.Table;
 namespace TrainSchedule.Database
 {
     /// <summary>
-    /// Trainline inherits from TableEntity which is the object to query against
+    /// Trainline inherits from TableEntity. This object is used to
+    /// query against Azure Table DB
     /// </summary>
     public class TrainlineEntity : TableEntity
     {

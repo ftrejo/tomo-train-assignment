@@ -45,7 +45,27 @@ namespace TrainSchedule.IntegrationTests
         }
 
         [Test]
-        public async Task TestGetAll()
+        public async Task TestAddTrainlineBadName()
+        {
+            RestRequest request = new RestRequest("api/station/AddTrainline", DataFormat.Json);
+            request.Method = Method.POST;
+
+            Trainline tl = new Trainline();
+            tl.Name = "!!!!";
+            tl.Schedule = new string[] { "11:15 AM", "1:30 PM" };
+
+            string result = JsonConvert.SerializeObject(tl);
+            var cancellationTokenSource = new CancellationTokenSource();
+
+            request.AddJsonBody(result);
+            var response = await _client.ExecuteAsync(request, cancellationTokenSource.Token);
+
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.IsTrue(response.Content.Contains("AddTrainline error:"));
+        }
+
+        [Test]
+        public async Task TestGetAllTrainlines()
         {
             await createTrains();
 
@@ -59,6 +79,19 @@ namespace TrainSchedule.IntegrationTests
             Assert.IsTrue(response.Content.Contains("ABCD"));
             Assert.IsTrue(response.Content.Contains("EFGH"));
             Assert.IsTrue(response.Content.Contains("IJKL"));
+        }
+
+        [Test]
+        public async Task TestGetAllTrainlinesNoTrains()
+        {
+            RestRequest request = new RestRequest("api/station/GetAllTrainlineNames", DataFormat.Json);
+            request.Method = Method.GET;
+            var cancellationTokenSource = new CancellationTokenSource();
+
+            var response = await _client.ExecuteAsync(request, cancellationTokenSource.Token);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.IsTrue(response.Content.Contains("No trainlines"));
         }
 
         [Test]
@@ -79,6 +112,21 @@ namespace TrainSchedule.IntegrationTests
         }
 
         [Test]
+        public async Task TestGetTrainlineNotFound()
+        {
+            await createTrains();
+
+            RestRequest request = new RestRequest("/api/station/GetTrainline", DataFormat.Json);
+            request.Method = Method.GET;
+            request.AddParameter("key", "WWWW");
+            var cancellationTokenSource = new CancellationTokenSource();
+
+            var response = await _client.ExecuteAsync(request, cancellationTokenSource.Token);
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.IsTrue(response.Content.Contains("not found"));
+        }
+
+        [Test]
         public async Task TestGetMultipleTrains()
         {
             await createTrains();
@@ -92,6 +140,22 @@ namespace TrainSchedule.IntegrationTests
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
             Assert.IsTrue(response.Content.Contains("2:30 PM"));
+        }
+
+        [Test]
+        public async Task TestGetMultipleTrainsNoMultiple()
+        {
+            await createSingleTrainline("SING");
+
+            RestRequest request = new RestRequest("/api/station/GetNextMultipleTrains", DataFormat.Json);
+            request.Method = Method.GET;
+            request.AddParameter("time", "1:30 PM");
+            var cancellationTokenSource = new CancellationTokenSource();
+
+            var response = await _client.ExecuteAsync(request, cancellationTokenSource.Token);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            Assert.IsTrue(response.Content.Contains("Multiple trains do not arrive at the same time"));
         }
 
         private async Task createTrains()
@@ -138,6 +202,22 @@ namespace TrainSchedule.IntegrationTests
             request.AddJsonBody(result);
             await _client.ExecuteAsync(request, cancellationTokenSource.Token);
 
+        }
+
+        private async Task createSingleTrainline(string name)
+        {
+            RestRequest request = new RestRequest("api/station/AddTrainline", DataFormat.Json);
+            request.Method = Method.POST;
+
+            Trainline tl = new Trainline();
+            tl.Name = name;
+            tl.Schedule = new string[] { "11:15 AM", "1:30 PM" };
+
+            string result = JsonConvert.SerializeObject(tl);
+            var cancellationTokenSource = new CancellationTokenSource();
+
+            request.AddJsonBody(result);
+            await _client.ExecuteAsync(request, cancellationTokenSource.Token);
         }
     }
 }
