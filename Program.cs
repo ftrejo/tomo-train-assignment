@@ -23,10 +23,6 @@ namespace TrainSchedule
                     config.Sources.Clear();
 
                     IHostEnvironment env = hostingContext.HostingEnvironment;
-
-                    config
-                        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                        .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true);
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

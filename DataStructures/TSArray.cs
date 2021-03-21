@@ -12,7 +12,7 @@ namespace TrainSchedule.DataStructures
     /// </summary>
     public class TSArray
     {
-        private Data[] data = new Data[1440];
+        private Data[] _data = new Data[1440];
 
         /// <summary>
         /// Initializes the TSArray with a list of TrainlineEntities
@@ -20,9 +20,9 @@ namespace TrainSchedule.DataStructures
         /// <param name="tle">List of trainlineEntities</param>
         public TSArray(List<TrainlineEntity> tle)
         {
-            for(int i = 0; i < data.Length; i++)
+            for(int i = 0; i < _data.Length; i++)
             {
-                data[i] = new Data();
+                _data[i] = new Data();
             }
 
             populateArray(tle);
@@ -37,11 +37,11 @@ namespace TrainSchedule.DataStructures
         {
             get
             {
-                return data[id].count;
+                return _data[id].count;
             }
             set
             {
-                data[id].count = value;
+                _data[id].count = value;
             }
         }
 
@@ -112,9 +112,9 @@ namespace TrainSchedule.DataStructures
             {
                 int index = Utility.ConvertTimeToInt(s);
 
-                lock (data[index])
+                lock (_data[index])
                 {
-                    data[index].Increment();
+                    _data[index].Increment();
                 }
             }
         }

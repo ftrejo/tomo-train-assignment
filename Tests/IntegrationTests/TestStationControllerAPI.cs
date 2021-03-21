@@ -15,14 +15,14 @@ namespace TrainSchedule.IntegrationTests
     [TestFixture]
     public class TestStationControllerAPI
     {
-        private TableDB db;
-        private RestClient client = new RestClient("https://localhost:5001/");
+        private TableDB _db;
+        private RestClient _client = new RestClient("https://localhost:5001/");
 
         [SetUp]
         public void Init()
         {
-            db = new TableDB(CosmosTableDB.GetConnectionString(), "schedules");
-            db.DeleteAll<TrainlineEntity>();
+            _db = new TableDB(CosmosTableDB.GetConnectionString(), "schedules");
+            _db.DeleteAll<TrainlineEntity>();
         }
 
         [Test]
@@ -39,7 +39,7 @@ namespace TrainSchedule.IntegrationTests
             var cancellationTokenSource = new CancellationTokenSource();
 
             request.AddJsonBody(result);
-            var response = await client.ExecuteAsync(request, cancellationTokenSource.Token);
+            var response = await _client.ExecuteAsync(request, cancellationTokenSource.Token);
 
             Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
         }
@@ -53,7 +53,7 @@ namespace TrainSchedule.IntegrationTests
             request.Method = Method.GET;
             var cancellationTokenSource = new CancellationTokenSource();
 
-            var response = await client.ExecuteAsync(request, cancellationTokenSource.Token);
+            var response = await _client.ExecuteAsync(request, cancellationTokenSource.Token);
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             Assert.IsTrue(response.Content.Contains("ABCD"));
@@ -71,7 +71,7 @@ namespace TrainSchedule.IntegrationTests
             request.AddParameter("key", "ABCD");
             var cancellationTokenSource = new CancellationTokenSource();
 
-            var response = await client.ExecuteAsync(request, cancellationTokenSource.Token);
+            var response = await _client.ExecuteAsync(request, cancellationTokenSource.Token);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
             Assert.IsTrue(response.Content.Contains("11:15 AM"));
@@ -88,7 +88,7 @@ namespace TrainSchedule.IntegrationTests
             request.AddParameter("time", "1:30 PM");
             var cancellationTokenSource = new CancellationTokenSource();
 
-            var response = await client.ExecuteAsync(request, cancellationTokenSource.Token);
+            var response = await _client.ExecuteAsync(request, cancellationTokenSource.Token);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
             Assert.IsTrue(response.Content.Contains("2:30 PM"));
@@ -108,7 +108,7 @@ namespace TrainSchedule.IntegrationTests
             var cancellationTokenSource = new CancellationTokenSource();
 
             request.AddJsonBody(result);
-            await client.ExecuteAsync(request, cancellationTokenSource.Token);
+            await _client.ExecuteAsync(request, cancellationTokenSource.Token);
 
             // Second item
             request = new RestRequest("api/station/AddTrainline", DataFormat.Json);
@@ -122,7 +122,7 @@ namespace TrainSchedule.IntegrationTests
             cancellationTokenSource = new CancellationTokenSource();
 
             request.AddJsonBody(result);
-            await client.ExecuteAsync(request, cancellationTokenSource.Token);
+            await _client.ExecuteAsync(request, cancellationTokenSource.Token);
 
             // Third item
             request = new RestRequest("api/station/AddTrainline", DataFormat.Json);
@@ -136,7 +136,7 @@ namespace TrainSchedule.IntegrationTests
             cancellationTokenSource = new CancellationTokenSource();
 
             request.AddJsonBody(result);
-            await client.ExecuteAsync(request, cancellationTokenSource.Token);
+            await _client.ExecuteAsync(request, cancellationTokenSource.Token);
 
         }
     }

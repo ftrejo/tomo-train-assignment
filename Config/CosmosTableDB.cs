@@ -9,9 +9,9 @@ namespace TrainSchedule.Config
     public class CosmosTableDB
     {
 #if DEBUG
-        private static string connectionString = "testtrainschedulecosmosCS";
+        private static string _connectionString = "testtrainschedulecosmosCS";
 #else
-        private static string connectionString = "trainschedulecosmosCS";
+        private static string _connectionString = "trainschedulecosmosCS";
 #endif
 
         /// <summary>
@@ -19,7 +19,7 @@ namespace TrainSchedule.Config
         /// </summary>
         public static string GetConnectionString()
         {
-            return getSecret(connectionString).Result;
+            return getSecret(_connectionString).Result;
         }
 
         private static async Task<string> getSecret(string secretName)

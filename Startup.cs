@@ -29,7 +29,6 @@ namespace TrainSchedule
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.Configure<CosmosTableDB>(Configuration.GetSection("CosmosTableDB"));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TrainSchedule", Version = "v1" });
