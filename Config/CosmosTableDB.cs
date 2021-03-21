@@ -1,15 +1,35 @@
 ﻿using System;
+using System.Threading.Tasks;
+
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 
 namespace TrainSchedule.Config
 {
-    /// <summary>
-    /// Autopopulated class from appsetting.json files
-    /// </summary>
     public class CosmosTableDB
     {
+#if DEBUG
+        private static string connectionString = "testtrainschedulecosmosCS";
+#else
+        private static string connectionString = "trainschedulecosmosCS";
+#endif
+
         /// <summary>
-        /// DB connection string
+        /// Get the DB connection string from Azure Vault
         /// </summary>
-        public string ConnectionString { get; set; }
+        public static string GetConnectionString()
+        {
+            return getSecret(connectionString).Result;
+        }
+
+        private static async Task<string> getSecret(string secretName)
+        {
+            var kvUri = $"https://trainschedulevault.vault.azure.net/";
+            SecretClient client = new SecretClient(new Uri(kvUri), new AzureCliCredential());
+
+            var secret = await client.GetSecretAsync(secretName);
+
+            return secret.Value.Value;
+        }
     }
 }

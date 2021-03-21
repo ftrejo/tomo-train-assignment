@@ -30,9 +30,9 @@ namespace TrainSchedule.Controllers
         /// Controller constructor with settings
         /// </summary>
         /// <param name="settings">Contains the connection string</param>
-        public StationController(IOptions<CosmosTableDB> settings)
+        public StationController()
         {
-            _connectionString = settings.Value.ConnectionString;
+            _connectionString = CosmosTableDB.GetConnectionString();
         }
 
         /// <summary>

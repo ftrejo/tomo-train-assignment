@@ -6,6 +6,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
+using TrainSchedule.Config;
 using TrainSchedule.Models;
 using TrainSchedule.Database;
 
@@ -18,9 +19,9 @@ namespace TrainSchedule.IntegrationTests
         private RestClient client = new RestClient("https://localhost:5001/");
 
         [SetUp]
-        public async Task Init()
+        public void Init()
         {
-            db = new TableDB("DefaultEndpointsProtocol=https;AccountName=test-trainschedulecosmos;AccountKey=sUMvs98sMFkREyiDZDiUYgZreUORqzejznJAr2dHpYNUEMjy9UWu5n1A1GtlWURBEae8l23hWpd1CenFrr7Vxg==;TableEndpoint=https://test-trainschedulecosmos.table.cosmos.azure.com:443/;", "schedules");
+            db = new TableDB(CosmosTableDB.GetConnectionString(), "schedules");
             db.DeleteAll<TrainlineEntity>();
         }
 
